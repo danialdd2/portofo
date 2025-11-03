@@ -27,7 +27,7 @@ def msg_saver(data):
 
 def msg_saver2(data):
     with open('payam.csv', mode='a', encoding='utf-8') as database2:
-        email = data['email']          
+        email = data['email']
         subject = data['subject']
         message = data['message']
         file2 = csv.writer(database2, delimiter=',',
