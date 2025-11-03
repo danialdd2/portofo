@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect
-import csv
-import smtplib
-from email.message import EmailMessage
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+from flask import Flask, render_template, request, redirect, jsonify
+import resend
+# import csv
+# import smtplib
+# from email.message import EmailMessage
+# from email.mime.text import MIMEText
+# from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
 
@@ -50,6 +51,54 @@ SENDER_EMAIL_PASSWORD = "uiwn ihdk qusx kroh"
 #         return redirect('/thanku.html')
 #     else:
 #         return 'something went wrong'
+# -----------------------------
+
+# @app.route('/submit_form', methods=['POST', 'GET'])
+# def submit_form():
+#     if request.method == 'POST':
+#         try:
+#             data = request.form.to_dict()
+#             name = data.get('name')
+#             email = data.get('email')
+#             subject = data.get('subject')
+#             message = data.get('message')
+
+#             msg = MIMEMultipart()
+#             msg['From'] = SENDER_EMAIL_ADDRESS
+#             msg['To'] = 'xxosef6@gmail.com'
+#             msg['Subject'] = f"New Contact Message: {subject}"
+
+#             body = f"""
+#             You received a new message from your portfolio contact form:
+
+#             Name: {name}
+#             Email: {email}
+#             Subject: {subject}
+#             Message:
+#             {message}
+#             """
+
+#             msg.attach(MIMEText(body, 'plain'))
+
+#             # ارسال ایمیل با SMTP Gmail
+#             with smtplib.SMTP('smtp.gmail.com', 587) as server:
+#                 server.starttls()
+#                 server.login(SENDER_EMAIL_ADDRESS, SENDER_EMAIL_PASSWORD)
+#                 server.send_message(msg)
+
+#             print("Email sent successfully!")
+#             return redirect('/thanku.html')
+
+#         except Exception as e:
+#             print(f"Error: {e}")
+#             return 'Something went wrong while sending the email 😢'
+
+#     else:
+#         return 'Something went wrong 😢'
+
+# -----------------------------------------
+
+resend.api_key = "re_QpfnJJLq_9Rjhvq6HYNNcKrYeoLXLZ8Eu"
 
 
 @app.route('/submit_form', methods=['POST', 'GET'])
@@ -62,34 +111,24 @@ def submit_form():
             subject = data.get('subject')
             message = data.get('message')
 
-            msg = MIMEMultipart()
-            msg['From'] = SENDER_EMAIL_ADDRESS
-            msg['To'] = 'xxosef6@gmail.com'
-            msg['Subject'] = f"New Contact Message: {subject}"
+            email_data = {
+                "from": f"{name} <onboarding@resend.dev>",
+                "to": "xxosef6@gmail.com",
+                "subject": f"New Contact Message: {subject}",
+                "html": f"""
+                    <p><strong>Name:</strong> {name}</p>
+                    <p><strong>Email:</strong> {email}</p>
+                    <p><strong>phone number:</strong> {subject}</p>
+                    <p><strong>Message:</strong><br>{message}</p>
+                """
+            }
 
-            body = f"""
-            You received a new message from your portfolio contact form:
-
-            Name: {name}
-            Email: {email}
-            Subject: {subject}
-            Message:
-            {message}
-            """
-
-            msg.attach(MIMEText(body, 'plain'))
-
-            # ارسال ایمیل با SMTP Gmail
-            with smtplib.SMTP('smtp.gmail.com', 587) as server:
-                server.starttls()
-                server.login(SENDER_EMAIL_ADDRESS, SENDER_EMAIL_PASSWORD)
-                server.send_message(msg)
-
-            print("Email sent successfully!")
+            resend.Emails.send(email_data)
+            print("✅ Email sent successfully!")
             return redirect('/thanku.html')
 
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"❌ Error: {e}")
             return 'Something went wrong while sending the email 😢'
 
     else:
